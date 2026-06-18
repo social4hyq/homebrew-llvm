@@ -13,6 +13,11 @@ class LlvmAT22 < Formula
     regex(/^llvmorg[._-]v?(\d+(?:\.\d+)+)$/i)
   end
 
+  bottle do
+    root_url "https://github.com/social4hyq/homebrew-llvm/releases/download/v22.1.7"
+    sha256 cellar: :any_skip_relocation, arm64_ohos: "d68f736dc16a55f9d68b80482f6df1cdbacdf7d97bfc038a24e967f95fbaff1e"
+  end
+
   keg_only "this is a versioned HarmonyOS bootstrap toolchain"
 
   depends_on "cmake"    => :build
