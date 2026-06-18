@@ -10,7 +10,7 @@ class LlvmAT21 < Formula
 
   bottle do
     root_url "https://atomgit.com/social4hyq/homebrew-llvm/releases/download/v21.1.8"
-    sha256 cellar: :any_skip_relocation, arm64_ohos: "9249dd5263098a4fa0da596926624cb943e7c042bd0db9dc0089035dbb80fce7"
+    sha256 cellar: :any_skip_relocation, arm64_ohos: "f0013bd2e2e73e4e12538d79bcd74f9bed9c5b97b82a86ef68ad02b2522f12f6"
   end
 
   keg_only "this is a versioned HarmonyOS bootstrap toolchain"
