@@ -15,10 +15,6 @@ All formulas are **keg-only** — they install into isolated prefixes and do not
 ## Install
 
 ```sh
-# Add tap (atomgit.com mirror)
-brew tap social4hyq/llvm https://atomgit.com/social4hyq/homebrew-llvm.git
-
-# Or from GitHub
 brew tap social4hyq/llvm https://github.com/social4hyq/homebrew-llvm.git
 
 # Install LLVM 21 (with pre-built bottle)
@@ -50,7 +46,7 @@ $LLVM21/bin/clang++ --target=aarch64-linux-ohos -stdlib=libc++ \
 
 ## Dependencies
 
-- [`ohos-sdk`](https://atomgit.com/Harmonybrew/homebrew-ohos-sdk) — provides sysroot, libcxx-ohos headers, and binary-sign-tool
+- `ohos-sdk` — provides sysroot, libcxx-ohos headers, and binary-sign-tool
 - `cmake`, `ninja` — build only
 
 ## Coexistence with ohos-sdk
