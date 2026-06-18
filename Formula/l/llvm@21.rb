@@ -103,9 +103,9 @@ class LlvmAT21 < Formula
       -DDEFAULT_SYSROOT=#{sysroot}
       -DCMAKE_C_FLAGS=-D__MUSL__ -fstack-protector-strong
       -DCMAKE_CXX_FLAGS=-D__MUSL__ -fstack-protector-strong
-      -DCMAKE_EXE_LINKER_FLAGS=-Wl,-z,relro,-z,now -Wl,-z,noexecstack
-      -DCMAKE_SHARED_LINKER_FLAGS=-Wl,-z,relro,-z,now -Wl,-z,noexecstack
-      -DCMAKE_MODULE_LINKER_FLAGS=-Wl,-z,relro,-z,now -Wl,-z,noexecstack
+      -DCMAKE_EXE_LINKER_FLAGS=-Wl,--code-sign -Wl,-z,relro,-z,now -Wl,-z,noexecstack
+      -DCMAKE_SHARED_LINKER_FLAGS=-Wl,--code-sign -Wl,-z,relro,-z,now -Wl,-z,noexecstack
+      -DCMAKE_MODULE_LINKER_FLAGS=-Wl,--code-sign -Wl,-z,relro,-z,now -Wl,-z,noexecstack
     ]
     args << "-DRUNTIMES_CMAKE_ARGS=-DCMAKE_MODULE_PATH=#{cmake_modules}" \
             ";-DCMAKE_SYSROOT=#{sysroot}" \
