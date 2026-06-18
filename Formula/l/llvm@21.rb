@@ -8,6 +8,11 @@ class LlvmAT21 < Formula
     sha256 "4633a23617fa31a3ea51242586ea7fb1da7140e426bd62fc164261fe036aa142"
   end
 
+  bottle do
+    root_url "https://atomgit.com/social4hyq/homebrew-llvm/releases/download/v21.1.8"
+    sha256 cellar: :any_skip_relocation, arm64_ohos: "9249dd5263098a4fa0da596926624cb943e7c042bd0db9dc0089035dbb80fce7"
+  end
+
   keg_only "this is a versioned HarmonyOS bootstrap toolchain"
 
   depends_on "cmake"    => :build
