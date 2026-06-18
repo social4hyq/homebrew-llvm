@@ -7,8 +7,8 @@ Homebrew tap providing LLVM toolchains (clang + lld + OHOS multiarch runtime lib
 | Formula | Version | Bottle | Notes |
 |---------|---------|--------|-------|
 | `llvm@21` | 21.1.8 | arm64_ohos | keg-only, code-sign patch |
-| `llvm@22` | 22.1.7 | — | keg-only, code-sign patch |
-| `llvm` | 22.1.7 | — | keg-only, unversioned alias |
+| `llvm@22` | 22.1.7 | arm64_ohos | keg-only, code-sign patch |
+| `llvm` | 22.1.7 | arm64_ohos | keg-only, same as llvm@22 |
 
 All formulas are **keg-only** — they install into isolated prefixes and do not conflict with `ohos-sdk` (LLVM 15).
 
@@ -20,7 +20,7 @@ brew tap social4hyq/llvm https://github.com/social4hyq/homebrew-llvm.git
 # Install LLVM 21 (with pre-built bottle)
 brew install llvm@21
 
-# Install LLVM 22 (builds from source)
+# Install LLVM 22 (with pre-built bottle)
 brew install llvm@22
 
 # Install latest (LLVM 22)
