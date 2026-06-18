@@ -13,12 +13,18 @@ class LlvmAT21 < Formula
     sha256 cellar: :any_skip_relocation, arm64_ohos: "f0013bd2e2e73e4e12538d79bcd74f9bed9c5b97b82a86ef68ad02b2522f12f6"
   end
 
+  livecheck do
+    url :stable
+    regex(/^llvmorg[._-]v?(\d+(?:\.\d+)+)$/i)
+  end
+
   keg_only "this is a versioned HarmonyOS bootstrap toolchain"
 
   depends_on "cmake"    => :build
   depends_on "ninja"    => :build
   depends_on "ohos-sdk"
 
+  # HarmonyOS code-sign support (adds CodeSign.cpp to lld/ELF).  Version-specific
   patch :p1 do
     file "Patches/llvm@21/code-sign.patch"
   end
