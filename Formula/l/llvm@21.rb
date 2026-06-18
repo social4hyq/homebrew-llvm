@@ -10,7 +10,7 @@ class LlvmAT21 < Formula
 
   bottle do
     root_url "https://github.com/social4hyq/homebrew-llvm/releases/download/v21.1.8"
-    sha256 cellar: :any_skip_relocation, arm64_ohos: "f0013bd2e2e73e4e12538d79bcd74f9bed9c5b97b82a86ef68ad02b2522f12f6"
+    sha256 cellar: :any_skip_relocation, arm64_ohos: "83004e8ad2903949010c13fc4cfef1fa80e41def0ea2de5fd76f49f0034a8f0b"
   end
 
   livecheck do
