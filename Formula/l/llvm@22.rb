@@ -308,11 +308,13 @@ class LlvmAT22 < Formula
              "-DLIBCXXABI_USE_LLVM_UNWINDER=ON",
              "-DLIBCXX_CXX_ABI=libcxxabi",
              "-DLIBCXX_HAS_MUSL_LIBC=ON",
+             "-DLIBCXX_HAS_PTHREAD_API=ON",
              "-DLIBCXX_CXX_ABI_INCLUDE_PATHS=#{libcxxabi_inc}",
              "-DLIBCXX_USE_COMPILER_RT=ON",
              "-DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=ON",
              "-DLIBCXXABI_ENABLE_STATIC_UNWINDER=ON",
              "-DLIBCXXABI_STATICALLY_LINK_UNWINDER_IN_STATIC_LIBRARY=YES",
+             "-DLIBCXXABI_HAS_CXA_THREAD_ATEXIT_IMPL=OFF",
              runtimes.to_s
       system "ninja", "-j", jobs.to_s, "install"
     end
