@@ -82,12 +82,12 @@ class LlvmAT21 < Formula
       -DCMAKE_CXX_COMPILER=clang++
       -DLLVM_ENABLE_PROJECTS=clang;lld
       -DLLVM_ENABLE_RUNTIMES=libcxx;libcxxabi;libunwind;compiler-rt
-      -DLLVM_TARGETS_TO_BUILD=AArch64
+      -DLLVM_TARGETS_TO_BUILD=AArch64;X86
       -DLLVM_DEFAULT_TARGET_TRIPLE=#{HOST_TRIPLE}
       -DLLVM_ENABLE_ASSERTIONS=OFF
       -DLLVM_PARALLEL_COMPILE_JOBS=#{jobs}
       -DLLVM_PARALLEL_LINK_JOBS=#{link_jobs}
-      -DLLVM_ENABLE_LTO=OFF
+      -DLLVM_ENABLE_LTO=Thin
       -DLLVM_ENABLE_LLD=ON
       -DLLVM_OPTIMIZED_TABLEGEN=ON
       -DLLVM_INSTALL_UTILS=ON
@@ -111,11 +111,11 @@ class LlvmAT21 < Formula
       -DDEFAULT_SYSROOT=#{sysroot}
     ]
     # Multi-word flags must not go in %W[...] — %W splits on whitespace.
-    args << "-DCMAKE_C_FLAGS=-D__MUSL__ -fstack-protector-strong"
-    args << "-DCMAKE_CXX_FLAGS=-D__MUSL__ -fstack-protector-strong"
-    args << "-DCMAKE_EXE_LINKER_FLAGS=-Wl,--code-sign -Wl,-z,relro,-z,now -Wl,-z,noexecstack"
-    args << "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,--code-sign -Wl,-z,relro,-z,now -Wl,-z,noexecstack"
-    args << "-DCMAKE_MODULE_LINKER_FLAGS=-Wl,--code-sign -Wl,-z,relro,-z,now -Wl,-z,noexecstack"
+    args << "-DCMAKE_C_FLAGS=-D__MUSL__ -fstack-protector-strong -no-canonical-prefixes"
+    args << "-DCMAKE_CXX_FLAGS=-D__MUSL__ -fstack-protector-strong -no-canonical-prefixes"
+    args << "-DCMAKE_EXE_LINKER_FLAGS=-Wl,--code-sign -Wl,--build-id=sha1 -Wl,-z,relro,-z,now -Wl,-z,noexecstack"
+    args << "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,--code-sign -Wl,--build-id=sha1 -Wl,-z,relro,-z,now -Wl,-z,noexecstack"
+    args << "-DCMAKE_MODULE_LINKER_FLAGS=-Wl,--code-sign -Wl,--build-id=sha1 -Wl,-z,relro,-z,now -Wl,-z,noexecstack"
     args << "-DRUNTIMES_CMAKE_ARGS=-DCMAKE_MODULE_PATH=#{cmake_modules}" \
             ";-DCMAKE_SYSROOT=#{sysroot}" \
             ";-DCMAKE_C_FLAGS=-D__MUSL__" \
@@ -261,7 +261,8 @@ class LlvmAT21 < Formula
     libcxxabi_inc = buildpath/"libcxxabi/include"
 
     cflags = "--target=#{TARGET_TRIPLE} --sysroot=#{sysroot} -D__MUSL__ " \
-             "-I#{sysroot}/usr/include -fPIC -fstack-protector-strong"
+             "-I#{sysroot}/usr/include -fPIC -fstack-protector-strong " \
+             "-funwind-tables -fno-omit-frame-pointer"
     cxxflags_unwind   = "#{cflags} -I#{libcxxabi_inc} -I#{libcxx_ohos} -nostdinc++"
     cxxflags_runtimes = cflags
 
@@ -313,6 +314,7 @@ class LlvmAT21 < Formula
              "-DLIBCXXABI_USE_COMPILER_RT=ON",
              "-DLIBCXXABI_USE_LLVM_UNWINDER=ON",
              "-DLIBCXX_CXX_ABI=libcxxabi",
+             "-DLIBCXX_ABI_NAMESPACE=__h",
              "-DLIBCXX_HAS_MUSL_LIBC=ON",
              "-DLIBCXX_HAS_PTHREAD_API=ON",
              "-DLIBCXX_CXX_ABI_INCLUDE_PATHS=#{libcxxabi_inc}",

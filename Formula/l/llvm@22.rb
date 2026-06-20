@@ -97,6 +97,8 @@ class LlvmAT22 < Formula
       -DLLVM_ENABLE_BINDINGS=OFF
       -DCLANG_BUILD_EXAMPLES=OFF
       -DCLANG_VENDOR=OHOS
+      -DLLVM_ENABLE_ZSTD=FORCE_ON
+      -DLLVM_USE_STATIC_ZSTD=ON
       -DBUILD_SHARED_LIBS=OFF
       -DLIBCXXABI_ENABLE_STATIC_UNWINDER=ON
       -DLIBCXX_HAS_MUSL_LIBC=ON
@@ -107,12 +109,13 @@ class LlvmAT22 < Formula
       -DLIBUNWIND_ENABLE_SHARED=OFF
       -DLIBUNWIND_USE_COMPILER_RT=ON
       -DDEFAULT_SYSROOT=#{sysroot}
-      -DCMAKE_C_FLAGS=-D__MUSL__ -fstack-protector-strong
-      -DCMAKE_CXX_FLAGS=-D__MUSL__ -fstack-protector-strong
-      -DCMAKE_EXE_LINKER_FLAGS=-Wl,--code-sign -Wl,-z,relro,-z,now -Wl,-z,noexecstack
-      -DCMAKE_SHARED_LINKER_FLAGS=-Wl,--code-sign -Wl,-z,relro,-z,now -Wl,-z,noexecstack
-      -DCMAKE_MODULE_LINKER_FLAGS=-Wl,--code-sign -Wl,-z,relro,-z,now -Wl,-z,noexecstack
     ]
+    # Multi-word flags must not go in %W[...] — %W splits on whitespace.
+    args << "-DCMAKE_C_FLAGS=-D__MUSL__ -fstack-protector-strong -no-canonical-prefixes"
+    args << "-DCMAKE_CXX_FLAGS=-D__MUSL__ -fstack-protector-strong -no-canonical-prefixes"
+    args << "-DCMAKE_EXE_LINKER_FLAGS=-Wl,--code-sign -Wl,--build-id=sha1 -Wl,-z,relro,-z,now -Wl,-z,noexecstack"
+    args << "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,--code-sign -Wl,--build-id=sha1 -Wl,-z,relro,-z,now -Wl,-z,noexecstack"
+    args << "-DCMAKE_MODULE_LINKER_FLAGS=-Wl,--code-sign -Wl,--build-id=sha1 -Wl,-z,relro,-z,now -Wl,-z,noexecstack"
     args << "-DRUNTIMES_CMAKE_ARGS=-DCMAKE_MODULE_PATH=#{cmake_modules}" \
             ";-DCMAKE_SYSROOT=#{sysroot}" \
             ";-DCMAKE_C_FLAGS=-D__MUSL__" \
@@ -137,7 +140,9 @@ class LlvmAT22 < Formula
     return unless cg.exist?
     return if cg.read(64).include?("Stubbed for HarmonyOS")
     FileUtils.cp(cg, "#{cg}.orig")
-    cg.write <<~SH
+    # brew extends Pathname#write to refuse overwriting existing files —
+    # use File.write to bypass that safety check.
+    File.write(cg, <<~SH)
       #!/bin/sh
       # Stubbed for HarmonyOS host build — original at config.guess.orig
       echo "#{HOST_TRIPLE}"
@@ -256,7 +261,8 @@ class LlvmAT22 < Formula
     libcxxabi_inc = buildpath/"libcxxabi/include"
 
     cflags = "--target=#{TARGET_TRIPLE} --sysroot=#{sysroot} -D__MUSL__ " \
-             "-I#{sysroot}/usr/include -fPIC -fstack-protector-strong"
+             "-I#{sysroot}/usr/include -fPIC -fstack-protector-strong " \
+             "-funwind-tables -fno-omit-frame-pointer"
     cxxflags_unwind   = "#{cflags} -I#{libcxxabi_inc} -I#{libcxx_ohos} -nostdinc++"
     cxxflags_runtimes = cflags
 
@@ -308,6 +314,7 @@ class LlvmAT22 < Formula
              "-DLIBCXXABI_USE_COMPILER_RT=ON",
              "-DLIBCXXABI_USE_LLVM_UNWINDER=ON",
              "-DLIBCXX_CXX_ABI=libcxxabi",
+             "-DLIBCXX_ABI_NAMESPACE=__h",
              "-DLIBCXX_HAS_MUSL_LIBC=ON",
              "-DLIBCXX_HAS_PTHREAD_API=ON",
              "-DLIBCXX_CXX_ABI_INCLUDE_PATHS=#{libcxxabi_inc}",
