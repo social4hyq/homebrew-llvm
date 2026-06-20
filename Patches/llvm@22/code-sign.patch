@@ -1,6 +1,6 @@
 diff -ruN a/lld/ELF/CMakeLists.txt b/lld/ELF/CMakeLists.txt
---- a/lld/ELF/CMakeLists.txt	2026-06-17 16:07:40.605788125 +0800
-+++ b/lld/ELF/CMakeLists.txt	2026-06-17 16:07:41.085780000 +0800
+--- a/lld/ELF/CMakeLists.txt	2026-06-20 14:18:53.701083282 +0800
++++ b/lld/ELF/CMakeLists.txt	2026-06-20 14:18:54.765080157 +0800
 @@ -39,6 +39,7 @@
    ARMErrataFix.cpp
    BPSectionOrderer.cpp
@@ -11,7 +11,7 @@ diff -ruN a/lld/ELF/CMakeLists.txt b/lld/ELF/CMakeLists.txt
    DriverUtils.cpp
 diff -ruN a/lld/ELF/CodeSign.cpp b/lld/ELF/CodeSign.cpp
 --- a/lld/ELF/CodeSign.cpp	1970-01-01 08:00:00.000000000 +0800
-+++ b/lld/ELF/CodeSign.cpp	2026-06-17 16:07:41.101790000 +0800
++++ b/lld/ELF/CodeSign.cpp	2026-06-20 14:18:54.765080157 +0800
 @@ -0,0 +1,167 @@
 +/*
 + * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
@@ -182,7 +182,7 @@ diff -ruN a/lld/ELF/CodeSign.cpp b/lld/ELF/CodeSign.cpp
 +} // namespace FsVerityCodeSign
 diff -ruN a/lld/ELF/CodeSign.h b/lld/ELF/CodeSign.h
 --- a/lld/ELF/CodeSign.h	1970-01-01 08:00:00.000000000 +0800
-+++ b/lld/ELF/CodeSign.h	2026-06-17 16:07:41.109780000 +0800
++++ b/lld/ELF/CodeSign.h	2026-06-20 14:18:54.765080157 +0800
 @@ -0,0 +1,87 @@
 +/*
 + * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
@@ -272,8 +272,8 @@ diff -ruN a/lld/ELF/CodeSign.h b/lld/ELF/CodeSign.h
 +} // namespace FsVerityCodeSign
 +#endif // CODESIGN_H
 diff -ruN a/lld/ELF/Config.h b/lld/ELF/Config.h
---- a/lld/ELF/Config.h	2026-06-17 16:07:40.657780469 +0800
-+++ b/lld/ELF/Config.h	2026-06-17 16:07:41.953787031 +0800
+--- a/lld/ELF/Config.h	2026-06-20 14:18:53.701083282 +0800
++++ b/lld/ELF/Config.h	2026-06-20 14:18:54.765080157 +0800
 @@ -56,6 +56,7 @@
  struct PhdrEntry;
  
@@ -300,19 +300,20 @@ diff -ruN a/lld/ELF/Config.h b/lld/ELF/Config.h
  
  struct Ctx : CommonLinkerContext {
 diff -ruN a/lld/ELF/Driver.cpp b/lld/ELF/Driver.cpp
---- a/lld/ELF/Driver.cpp	2026-06-17 16:07:40.705788750 +0800
-+++ b/lld/ELF/Driver.cpp	2026-06-17 16:07:42.017782031 +0800
-@@ -1910,6 +1910,7 @@
-     ctx.arg.zRelro = false;
+--- a/lld/ELF/Driver.cpp	2026-06-20 14:18:53.705081407 +0800
++++ b/lld/ELF/Driver.cpp	2026-06-20 14:18:54.765080157 +0800
+@@ -1911,6 +1911,8 @@
  
    std::tie(ctx.arg.buildId, ctx.arg.buildIdVector) = getBuildId(ctx, args);
-+\n  ctx.arg.codeSign = args.hasFlag(OPT_code_sign, OPT_no_code_sign, false);
  
++  ctx.arg.codeSign = args.hasFlag(OPT_code_sign, OPT_no_code_sign, false);
++
    if (getZFlag(args, "pack-relative-relocs", "nopack-relative-relocs", false)) {
      ctx.arg.relrGlibc = true;
+     ctx.arg.relrPackDynRelocs = true;
 diff -ruN a/lld/ELF/Options.td b/lld/ELF/Options.td
---- a/lld/ELF/Options.td	2026-06-17 16:07:40.765780781 +0800
-+++ b/lld/ELF/Options.td	2026-06-17 16:07:41.317780625 +0800
+--- a/lld/ELF/Options.td	2026-06-20 14:18:53.709082969 +0800
++++ b/lld/ELF/Options.td	2026-06-20 14:18:54.769082344 +0800
 @@ -67,6 +67,10 @@
      "Check section addresses for overlaps (default)",
      "Do not check section addresses for overlaps">;
@@ -325,8 +326,8 @@ diff -ruN a/lld/ELF/Options.td b/lld/ELF/Options.td
    Eq<"compress-debug-sections", "Compress DWARF debug sections">,
    MetaVarName<"[none,zlib,zstd]">;
 diff -ruN a/lld/ELF/SyntheticSections.cpp b/lld/ELF/SyntheticSections.cpp
---- a/lld/ELF/SyntheticSections.cpp	2026-06-17 16:07:40.909780312 +0800
-+++ b/lld/ELF/SyntheticSections.cpp	2026-06-17 16:07:42.453780000 +0800
+--- a/lld/ELF/SyntheticSections.cpp	2026-06-20 14:18:53.713086407 +0800
++++ b/lld/ELF/SyntheticSections.cpp	2026-06-20 14:18:54.769082344 +0800
 @@ -387,6 +387,18 @@
    memcpy(hashBuf, buf.data(), hashSize);
  }
@@ -359,8 +360,8 @@ diff -ruN a/lld/ELF/SyntheticSections.cpp b/lld/ELF/SyntheticSections.cpp
  
  template void elf::splitSections<ELF32LE>(Ctx &);
 diff -ruN a/lld/ELF/SyntheticSections.h b/lld/ELF/SyntheticSections.h
---- a/lld/ELF/SyntheticSections.h	2026-06-17 16:07:40.837780156 +0800
-+++ b/lld/ELF/SyntheticSections.h	2026-06-17 16:07:42.177780312 +0800
+--- a/lld/ELF/SyntheticSections.h	2026-06-20 14:18:53.713086407 +0800
++++ b/lld/ELF/SyntheticSections.h	2026-06-20 14:18:54.769082344 +0800
 @@ -175,6 +175,19 @@
    uint8_t *hashBuf;
  };
@@ -382,8 +383,8 @@ diff -ruN a/lld/ELF/SyntheticSections.h b/lld/ELF/SyntheticSections.h
  // We create three instances of this class for .bss, .bss.rel.ro and "COMMON",
  // that are used for writable symbols, read-only symbols and common symbols,
 diff -ruN a/lld/ELF/Writer.cpp b/lld/ELF/Writer.cpp
---- a/lld/ELF/Writer.cpp	2026-06-17 16:07:40.977790625 +0800
-+++ b/lld/ELF/Writer.cpp	2026-06-17 16:07:42.573795469 +0800
+--- a/lld/ELF/Writer.cpp	2026-06-20 14:18:53.713086407 +0800
++++ b/lld/ELF/Writer.cpp	2026-06-20 14:18:54.769082344 +0800
 @@ -11,6 +11,7 @@
  #include "ARMErrataFix.h"
  #include "BPSectionOrderer.h"
@@ -480,7 +481,7 @@ diff -ruN a/lld/ELF/Writer.cpp b/lld/ELF/Writer.cpp
  template void elf::writeResult<ELF64LE>(Ctx &);
 diff -ruN a/lld/test/ELF/aarch64-ohos-codesign.s b/lld/test/ELF/aarch64-ohos-codesign.s
 --- a/lld/test/ELF/aarch64-ohos-codesign.s	1970-01-01 08:00:00.000000000 +0800
-+++ b/lld/test/ELF/aarch64-ohos-codesign.s	2026-06-17 16:07:41.837793750 +0800
++++ b/lld/test/ELF/aarch64-ohos-codesign.s	2026-06-20 14:18:56.073085626 +0800
 @@ -0,0 +1,30 @@
 +# REQUIRES: aarch64
 +# RUN: llvm-mc -filetype=obj -triple=aarch64-linux-ohos %s -o %t.o

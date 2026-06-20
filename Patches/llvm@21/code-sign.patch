@@ -1,6 +1,6 @@
 diff -ruN a/lld/ELF/CMakeLists.txt b/lld/ELF/CMakeLists.txt
---- a/lld/ELF/CMakeLists.txt	2026-06-17 15:51:11.121784844 +0800
-+++ b/lld/ELF/CMakeLists.txt	2026-06-17 15:51:22.525785937 +0800
+--- a/lld/ELF/CMakeLists.txt	2026-06-20 07:31:11.389595312 +0800
++++ b/lld/ELF/CMakeLists.txt	2026-06-20 07:31:11.809590937 +0800
 @@ -39,6 +39,7 @@
    ARMErrataFix.cpp
    BPSectionOrderer.cpp
@@ -11,7 +11,7 @@ diff -ruN a/lld/ELF/CMakeLists.txt b/lld/ELF/CMakeLists.txt
    DriverUtils.cpp
 diff -ruN a/lld/ELF/CodeSign.cpp b/lld/ELF/CodeSign.cpp
 --- a/lld/ELF/CodeSign.cpp	1970-01-01 08:00:00.000000000 +0800
-+++ b/lld/ELF/CodeSign.cpp	2026-06-17 15:51:22.121788594 +0800
++++ b/lld/ELF/CodeSign.cpp	2026-06-20 07:31:11.805590781 +0800
 @@ -0,0 +1,167 @@
 +/*
 + * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
@@ -182,7 +182,7 @@ diff -ruN a/lld/ELF/CodeSign.cpp b/lld/ELF/CodeSign.cpp
 +} // namespace FsVerityCodeSign
 diff -ruN a/lld/ELF/CodeSign.h b/lld/ELF/CodeSign.h
 --- a/lld/ELF/CodeSign.h	1970-01-01 08:00:00.000000000 +0800
-+++ b/lld/ELF/CodeSign.h	2026-06-17 15:51:22.053781875 +0800
++++ b/lld/ELF/CodeSign.h	2026-06-20 07:31:11.809590937 +0800
 @@ -0,0 +1,87 @@
 +/*
 + * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
@@ -272,8 +272,8 @@ diff -ruN a/lld/ELF/CodeSign.h b/lld/ELF/CodeSign.h
 +} // namespace FsVerityCodeSign
 +#endif // CODESIGN_H
 diff -ruN a/lld/ELF/Config.h b/lld/ELF/Config.h
---- a/lld/ELF/Config.h	2026-06-17 15:50:48.629792344 +0800
-+++ b/lld/ELF/Config.h	2026-06-17 15:51:22.177780000 +0800
+--- a/lld/ELF/Config.h	2026-06-20 07:31:11.393591562 +0800
++++ b/lld/ELF/Config.h	2026-06-20 07:31:11.805590781 +0800
 @@ -56,6 +56,7 @@
  struct PhdrEntry;
  
@@ -282,15 +282,16 @@ diff -ruN a/lld/ELF/Config.h b/lld/ELF/Config.h
  class GdbIndexSection;
  class GotPltSection;
  class GotSection;
-@@ -454,6 +455,7 @@
+@@ -454,6 +455,8 @@
    int32_t splitStackAdjustSize;
    SmallVector<uint8_t, 0> packageMetadata;
  
 +  bool codeSign = false;
- 
++
    // The following config options do not directly correspond to any
    // particular command line options.
-@@ -600,6 +602,7 @@
+ 
+@@ -599,6 +602,7 @@
    std::unique_ptr<StringTableSection> strTab;
    std::unique_ptr<SymbolTableBaseSection> symTab;
    std::unique_ptr<SymtabShndxSection> symTabShndx;
@@ -299,19 +300,20 @@ diff -ruN a/lld/ELF/Config.h b/lld/ELF/Config.h
  
  struct Ctx : CommonLinkerContext {
 diff -ruN a/lld/ELF/Driver.cpp b/lld/ELF/Driver.cpp
---- a/lld/ELF/Driver.cpp	2026-06-17 15:50:48.769785156 +0800
-+++ b/lld/ELF/Driver.cpp	2026-06-17 15:51:22.269780781 +0800
-@@ -1898,6 +1898,7 @@
+--- a/lld/ELF/Driver.cpp	2026-06-20 07:31:11.393591562 +0800
++++ b/lld/ELF/Driver.cpp	2026-06-20 07:31:11.809590937 +0800
+@@ -1898,6 +1898,8 @@
  
    std::tie(ctx.arg.buildId, ctx.arg.buildIdVector) = getBuildId(ctx, args);
  
 +  ctx.arg.codeSign = args.hasFlag(OPT_code_sign, OPT_no_code_sign, false);
- 
++
    if (getZFlag(args, "pack-relative-relocs", "nopack-relative-relocs", false)) {
      ctx.arg.relrGlibc = true;
+     ctx.arg.relrPackDynRelocs = true;
 diff -ruN a/lld/ELF/Options.td b/lld/ELF/Options.td
---- a/lld/ELF/Options.td	2026-06-17 15:50:48.721787969 +0800
-+++ b/lld/ELF/Options.td	2026-06-17 15:51:22.213795781 +0800
+--- a/lld/ELF/Options.td	2026-06-20 07:31:11.393591562 +0800
++++ b/lld/ELF/Options.td	2026-06-20 07:31:11.805590781 +0800
 @@ -67,6 +67,10 @@
      "Check section addresses for overlaps (default)",
      "Do not check section addresses for overlaps">;
@@ -324,8 +326,8 @@ diff -ruN a/lld/ELF/Options.td b/lld/ELF/Options.td
    Eq<"compress-debug-sections", "Compress DWARF debug sections">,
    MetaVarName<"[none,zlib,zstd]">;
 diff -ruN a/lld/ELF/SyntheticSections.cpp b/lld/ELF/SyntheticSections.cpp
---- a/lld/ELF/SyntheticSections.cpp	2026-06-17 15:51:10.885786094 +0800
-+++ b/lld/ELF/SyntheticSections.cpp	2026-06-17 15:51:22.393796250 +0800
+--- a/lld/ELF/SyntheticSections.cpp	2026-06-20 07:31:11.393591562 +0800
++++ b/lld/ELF/SyntheticSections.cpp	2026-06-20 07:31:11.805590781 +0800
 @@ -389,6 +389,18 @@
    memcpy(hashBuf, buf.data(), hashSize);
  }
@@ -345,10 +347,11 @@ diff -ruN a/lld/ELF/SyntheticSections.cpp b/lld/ELF/SyntheticSections.cpp
  BssSection::BssSection(Ctx &ctx, StringRef name, uint64_t size,
                         uint32_t alignment)
      : SyntheticSection(ctx, name, SHT_NOBITS, SHF_ALLOC | SHF_WRITE,
-@@ -5000,6 +5012,10 @@
+@@ -4999,6 +5011,11 @@
+     add(*ctx.in.shStrTab);
    if (ctx.in.strTab)
      add(*ctx.in.strTab);
- 
++
 +  if (ctx.arg.codeSign) {
 +    ctx.in.codesign = std::make_unique<CodeSignSection>(ctx);
 +    add(*ctx.in.codesign);
@@ -357,9 +360,9 @@ diff -ruN a/lld/ELF/SyntheticSections.cpp b/lld/ELF/SyntheticSections.cpp
  
  template void elf::splitSections<ELF32LE>(Ctx &);
 diff -ruN a/lld/ELF/SyntheticSections.h b/lld/ELF/SyntheticSections.h
---- a/lld/ELF/SyntheticSections.h	2026-06-17 15:50:48.873786562 +0800
-+++ b/lld/ELF/SyntheticSections.h	2026-06-17 15:51:22.337781875 +0800
-@@ -173,6 +173,18 @@
+--- a/lld/ELF/SyntheticSections.h	2026-06-20 07:31:11.393591562 +0800
++++ b/lld/ELF/SyntheticSections.h	2026-06-20 07:31:11.805590781 +0800
+@@ -173,6 +173,19 @@
    uint8_t *hashBuf;
  };
  
@@ -375,12 +378,13 @@ diff -ruN a/lld/ELF/SyntheticSections.h b/lld/ELF/SyntheticSections.h
 +private:
 +  uint8_t *hashBuf;
 +};
- 
++
  // BssSection is used to reserve space for copy relocations and common symbols.
  // We create three instances of this class for .bss, .bss.rel.ro and "COMMON",
+ // that are used for writable symbols, read-only symbols and common symbols,
 diff -ruN a/lld/ELF/Writer.cpp b/lld/ELF/Writer.cpp
---- a/lld/ELF/Writer.cpp	2026-06-17 15:51:11.049783750 +0800
-+++ b/lld/ELF/Writer.cpp	2026-06-17 15:51:22.469790625 +0800
+--- a/lld/ELF/Writer.cpp	2026-06-20 07:31:11.393591562 +0800
++++ b/lld/ELF/Writer.cpp	2026-06-20 07:31:11.805590781 +0800
 @@ -11,6 +11,7 @@
  #include "ARMErrataFix.h"
  #include "BPSectionOrderer.h"
@@ -419,17 +423,19 @@ diff -ruN a/lld/ELF/Writer.cpp b/lld/ELF/Writer.cpp
  
    Ctx &ctx;
    std::unique_ptr<FileOutputBuffer> &buffer;
-@@ -382,6 +389,9 @@
+@@ -381,6 +388,11 @@
+     // Backfill .note.gnu.build-id section content. This is done at last
      // because the content is usually a hash value of the entire output file.
      writeBuildId();
- 
++
 +    // Backfill .codesign section content.
 +    if (ctx.arg.codeSign)
 +      writeSelfSign();
- 
++
      if (errCount(ctx))
        return;
-@@ -3091,6 +3101,43 @@
+ 
+@@ -3089,6 +3101,44 @@
      part.buildId->writeBuildId(output);
  }
  
@@ -470,12 +476,13 @@ diff -ruN a/lld/ELF/Writer.cpp b/lld/ELF/Writer.cpp
 +  memcpy(buffer.data(), &fsWithSign, sizeof(fsWithSign));
 +  ctx.in.codesign->writeCodeSignSection(buffer.data(), sizeof(fsWithSign));
 +}
- 
++
  template void elf::writeResult<ELF32LE>(Ctx &);
  template void elf::writeResult<ELF32BE>(Ctx &);
+ template void elf::writeResult<ELF64LE>(Ctx &);
 diff -ruN a/lld/test/ELF/aarch64-ohos-codesign.s b/lld/test/ELF/aarch64-ohos-codesign.s
 --- a/lld/test/ELF/aarch64-ohos-codesign.s	1970-01-01 08:00:00.000000000 +0800
-+++ b/lld/test/ELF/aarch64-ohos-codesign.s	2026-06-17 15:51:22.581779844 +0800
++++ b/lld/test/ELF/aarch64-ohos-codesign.s	2026-06-20 07:31:12.665590000 +0800
 @@ -0,0 +1,30 @@
 +# REQUIRES: aarch64
 +# RUN: llvm-mc -filetype=obj -triple=aarch64-linux-ohos %s -o %t.o
