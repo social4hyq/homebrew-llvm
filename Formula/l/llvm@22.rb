@@ -264,6 +264,7 @@ class LlvmAT22 < Formula
       -DCMAKE_SYSTEM_NAME=Linux
       -DCMAKE_SYSTEM_PROCESSOR=aarch64
       -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
+      -DCMAKE_REQUIRED_FLAGS=--target=#{TARGET_TRIPLE};--sysroot=#{sysroot}
     ]
 
     stage = buildpath/"multiarch-runtimes-stage"

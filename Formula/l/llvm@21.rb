@@ -82,12 +82,12 @@ class LlvmAT21 < Formula
       -DCMAKE_CXX_COMPILER=clang++
       -DLLVM_ENABLE_PROJECTS=clang;lld
       -DLLVM_ENABLE_RUNTIMES=libcxx;libcxxabi;libunwind;compiler-rt
-      -DLLVM_TARGETS_TO_BUILD=AArch64;X86
+      -DLLVM_TARGETS_TO_BUILD=AArch64
       -DLLVM_DEFAULT_TARGET_TRIPLE=#{HOST_TRIPLE}
       -DLLVM_ENABLE_ASSERTIONS=OFF
       -DLLVM_PARALLEL_COMPILE_JOBS=#{jobs}
       -DLLVM_PARALLEL_LINK_JOBS=#{link_jobs}
-      -DLLVM_ENABLE_LTO=Thin
+      -DLLVM_ENABLE_LTO=OFF
       -DLLVM_ENABLE_LLD=ON
       -DLLVM_OPTIMIZED_TABLEGEN=ON
       -DLLVM_INSTALL_UTILS=ON
@@ -97,6 +97,8 @@ class LlvmAT21 < Formula
       -DLLVM_ENABLE_BINDINGS=OFF
       -DCLANG_BUILD_EXAMPLES=OFF
       -DCLANG_VENDOR=OHOS
+      -DLLVM_ENABLE_ZSTD=FORCE_ON
+      -DLLVM_USE_STATIC_ZSTD=ON
       -DBUILD_SHARED_LIBS=OFF
       -DLIBCXXABI_ENABLE_STATIC_UNWINDER=ON
       -DLIBCXX_HAS_MUSL_LIBC=ON
@@ -107,12 +109,13 @@ class LlvmAT21 < Formula
       -DLIBUNWIND_ENABLE_SHARED=OFF
       -DLIBUNWIND_USE_COMPILER_RT=ON
       -DDEFAULT_SYSROOT=#{sysroot}
-      -DCMAKE_C_FLAGS=-D__MUSL__ -fstack-protector-strong
-      -DCMAKE_CXX_FLAGS=-D__MUSL__ -fstack-protector-strong
-      -DCMAKE_EXE_LINKER_FLAGS=-Wl,--code-sign -Wl,-z,relro,-z,now -Wl,-z,noexecstack
-      -DCMAKE_SHARED_LINKER_FLAGS=-Wl,--code-sign -Wl,-z,relro,-z,now -Wl,-z,noexecstack
-      -DCMAKE_MODULE_LINKER_FLAGS=-Wl,--code-sign -Wl,-z,relro,-z,now -Wl,-z,noexecstack
     ]
+    # Multi-word flags must not go in %W[...] — %W splits on whitespace.
+    args << "-DCMAKE_C_FLAGS=-D__MUSL__ -fstack-protector-strong"
+    args << "-DCMAKE_CXX_FLAGS=-D__MUSL__ -fstack-protector-strong"
+    args << "-DCMAKE_EXE_LINKER_FLAGS=-Wl,--code-sign -Wl,-z,relro,-z,now -Wl,-z,noexecstack"
+    args << "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,--code-sign -Wl,-z,relro,-z,now -Wl,-z,noexecstack"
+    args << "-DCMAKE_MODULE_LINKER_FLAGS=-Wl,--code-sign -Wl,-z,relro,-z,now -Wl,-z,noexecstack"
     args << "-DRUNTIMES_CMAKE_ARGS=-DCMAKE_MODULE_PATH=#{cmake_modules}" \
             ";-DCMAKE_SYSROOT=#{sysroot}" \
             ";-DCMAKE_C_FLAGS=-D__MUSL__" \
@@ -137,7 +140,9 @@ class LlvmAT21 < Formula
     return unless cg.exist?
     return if cg.read(64).include?("Stubbed for HarmonyOS")
     FileUtils.cp(cg, "#{cg}.orig")
-    cg.write <<~SH
+    # brew extends Pathname#write to refuse overwriting existing files —
+    # use File.write to bypass that safety check.
+    File.write(cg, <<~SH)
       #!/bin/sh
       # Stubbed for HarmonyOS host build — original at config.guess.orig
       echo "#{HOST_TRIPLE}"
@@ -264,6 +269,7 @@ class LlvmAT21 < Formula
       -DCMAKE_SYSTEM_NAME=Linux
       -DCMAKE_SYSTEM_PROCESSOR=aarch64
       -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
+      -DCMAKE_REQUIRED_FLAGS=--target=#{TARGET_TRIPLE}\;--sysroot=#{sysroot}
     ]
 
     stage = buildpath/"multiarch-runtimes-stage"
