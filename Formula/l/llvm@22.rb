@@ -95,6 +95,8 @@ class LlvmAT22 < Formula
       -DLLVM_INCLUDE_EXAMPLES=OFF
       -DLLVM_INCLUDE_BENCHMARKS=OFF
       -DLLVM_ENABLE_BINDINGS=OFF
+      -DLLVM_ENABLE_TERMINFO=OFF
+      -DLIBUNWIND_USE_FRAME_HEADER_CACHE=ON
       -DCLANG_BUILD_EXAMPLES=OFF
       -DCLANG_VENDOR=OHOS
       -DLLVM_ENABLE_ZSTD=FORCE_ON
@@ -111,11 +113,12 @@ class LlvmAT22 < Formula
       -DDEFAULT_SYSROOT=#{sysroot}
     ]
     # Multi-word flags must not go in %W[...] — %W splits on whitespace.
-    args << "-DCMAKE_C_FLAGS=-D__MUSL__ -fstack-protector-strong -no-canonical-prefixes"
-    args << "-DCMAKE_CXX_FLAGS=-D__MUSL__ -fstack-protector-strong -no-canonical-prefixes"
-    args << "-DCMAKE_EXE_LINKER_FLAGS=-Wl,--code-sign -Wl,--build-id=sha1 -Wl,-z,relro,-z,now -Wl,-z,noexecstack"
-    args << "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,--code-sign -Wl,--build-id=sha1 -Wl,-z,relro,-z,now -Wl,-z,noexecstack"
-    args << "-DCMAKE_MODULE_LINKER_FLAGS=-Wl,--code-sign -Wl,--build-id=sha1 -Wl,-z,relro,-z,now -Wl,-z,noexecstack"
+    args << "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+    args << "-DCMAKE_C_FLAGS=-D__MUSL__ -fstack-protector-strong -no-canonical-prefixes -ffunction-sections -fdata-sections"
+    args << "-DCMAKE_CXX_FLAGS=-D__MUSL__ -fstack-protector-strong -no-canonical-prefixes -ffunction-sections -fdata-sections"
+    args << "-DCMAKE_EXE_LINKER_FLAGS=-Wl,--code-sign -Wl,--build-id=sha1 -Wl,--gc-sections -Wl,-z,relro,-z,now -Wl,-z,noexecstack"
+    args << "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,--code-sign -Wl,--build-id=sha1 -Wl,--gc-sections -Wl,-z,relro,-z,now -Wl,-z,noexecstack"
+    args << "-DCMAKE_MODULE_LINKER_FLAGS=-Wl,--code-sign -Wl,--build-id=sha1 -Wl,--gc-sections -Wl,-z,relro,-z,now -Wl,-z,noexecstack"
     args << "-DRUNTIMES_CMAKE_ARGS=-DCMAKE_MODULE_PATH=#{cmake_modules}" \
             ";-DCMAKE_SYSROOT=#{sysroot}" \
             ";-DCMAKE_C_FLAGS=-D__MUSL__" \
@@ -321,7 +324,7 @@ class LlvmAT22 < Formula
              "-DLIBCXX_USE_COMPILER_RT=ON",
              "-DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=ON",
              "-DLIBCXXABI_ENABLE_STATIC_UNWINDER=ON",
-             "-DLIBCXXABI_STATICALLY_LINK_UNWINDER_IN_STATIC_LIBRARY=YES",
+             "-DLIBCXXABI_STATICALLY_LINK_UNWINDER_IN_STATIC_LIBRARY=OFF",
              "-DLIBCXXABI_HAS_CXA_THREAD_ATEXIT_IMPL=OFF",
              runtimes.to_s
       system "ninja", "-j", jobs.to_s, "install"
