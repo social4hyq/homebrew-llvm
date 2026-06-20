@@ -15,7 +15,7 @@ class LlvmAT22 < Formula
 
   bottle do
     root_url "https://github.com/social4hyq/homebrew-llvm/releases/download/v22.1.7"
-    sha256 cellar: :any_skip_relocation, arm64_ohos: "31c462502be25be63837960e7e8f599599e7ef50a39ae6daa332a83ed4f26e60"
+    sha256 cellar: :any_skip_relocation, arm64_ohos: "afddc1841fc2163efe12c6c546ed64e2a8326876bfcc783a290486f31248e541"
   end
 
   keg_only "this is a versioned HarmonyOS bootstrap toolchain"
